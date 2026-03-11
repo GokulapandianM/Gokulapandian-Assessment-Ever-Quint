@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Water Tank Problem - Ever Quint</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { margin-top: 20px; }
+        table { border-collapse: collapse; }
+        td { width: 50px; height: 50px; border: 1px solid #ccc; text-align: center; }
+        .block { background-color: yellow; }
+        .water { background-color: #00aaff; }
+        .stats { margin-top: 20px; font-weight: bold; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <h2>Water Tank Problem</h2>
+    <div id="visualization" class="container"></div>
+    <div id="output" class="stats"></div>
+
+    <script>
+        function calculateWater(heights) {
+            const n = heights.length;
+            if (n === 0) return { total: 0, waterLevels: [] };
+
+            let leftMax = new Array(n).fill(0);
+            let rightMax = new Array(n).fill(0);
+            let waterLevels = new Array(n).fill(0);
+
+            leftMax[0] = heights[0];
+            for (let i = 1; i < n; i++) leftMax[i] = Math.max(leftMax[i - 1], heights[i]);
+
+            rightMax[n - 1] = heights[n - 1];
+            for (let i = n - 2; i >= 0; i--) rightMax[i] = Math.max(rightMax[i + 1], heights[i]);
+
+            let totalWater = 0;
+            for (let i = 0; i < n; i++) {
+                let water = Math.min(leftMax[i], rightMax[i]) - heights[i];
+                waterLevels[i] = water > 0 ? water : 0;
+                totalWater += waterLevels[i];
+            }
+            return { total: totalWater, waterLevels };
+        }
+
+        function renderTable(heights, waterLevels) {
+            const maxHeight = Math.max(...heights, ...waterLevels.map((w, i) => w + heights[i]));
+            const container = document.getElementById('visualization');
+            let table = '<table>';
+
+            for (let r = maxHeight; r > 0; r--) {
+                table += '<tr>';
+                for (let c = 0; c < heights.length; c++) {
+                    let cellClass = '';
+                    if (heights[c] >= r) cellClass = 'block';
+                    else if (heights[c] + waterLevels[c] >= r) cellClass = 'water';
+                    table += `<td class="${cellClass}"></td>`;
+                }
+                table += '</tr>';
+            }
+            table += '</table>';
+            container.innerHTML = table;
+        }
+
+        // Input from PDF 
+        const input = [0, 4, 0, 0, 0, 6, 0, 6, 4, 0];
+        const result = calculateWater(input);
+
+        renderTable(input, result.waterLevels);
+        document.getElementById('output').innerText = `Output: ${result.total} Units`;
+    </script>
+</body>
+</html>
